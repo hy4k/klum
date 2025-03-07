@@ -1,0 +1,33 @@
+{
+  "name": "my-firebase-project",
+  "version": "1.0.0",
+  "description": "A Firebase web project",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001"
+  },
+  "dependencies": {
+    "@genkit-ai/googleai": "^1.1.0",
+    "@google-cloud/firestore": "^7.11.0",
+    "firebase": "^11.4.0",
+    "firebase-admin": "^13.2.0",
+    "firebase-functions": "^6.3.2",
+    "genkit": "^1.1.0",
+    "next": "^15.2.1",
+    "openai": "^4.86.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react": "^7.37.4",
+    "genkit-cli": "^1.1.0",
+    "globals": "^16.0.0",
+    "typescript-eslint": "^8.26.0"
+  }
+}
