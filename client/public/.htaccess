@@ -1,0 +1,67 @@
+# 404 എറർ പേജിലേക്ക് റീഡയറക്ട് ചെയ്യുന്നതിനു പകരം
+# എല്ലാ റിക്വസ്റ്റുകളും ഇൻഡെക്സ് ഫയലിലേക്ക് റീഡയറക്ട് ചെയ്യുന്നു
+# ഇത് Next.js ക്ലയന്റ് സൈഡ് റൂട്ടിംഗിന് ആവശ്യമാണ്
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # നിലവിലുള്ള ഫയലുകളിലേക്കോ ഡയറക്ടറികളിലേക്കോ അല്ലെങ്കിൽ symbolic links
+  # മാത്രം റീറൈറ്റ് ചെയ്യരുത്
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  
+  # എല്ലാ മറ്റ് റിക്വസ്റ്റുകളും ഇൻഡെക്സ് ഫയലിലേക്ക് റൂട്ട് ചെയ്യുന്നു
+  RewriteRule ^(.*)$ index.html [QSA,L]
+</IfModule>
+
+# ഇന്റർനെറ്റ് എക്സ്പ്ലോറർ കാഷിങ് തടയുന്നു
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires 0
+</IfModule>
+
+# GZIP കംപ്രഷൻ എനേബിൾ ചെയ്യുന്നു
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE text/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE application/font-woff
+  AddOutputFilterByType DEFLATE application/font-woff2
+</IfModule>
+
+# ബ്രൗസർ കാഷിങ് സെറ്റ് ചെയ്യുന്നു - സ്റ്റാറ്റിക് അസറ്റുകൾക്ക് 
+<IfModule mod_expires.c>
+  ExpiresActive On
+  
+  # ഇമേജുകൾ
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  
+  # വീഡിയോ
+  ExpiresByType video/mp4 "access plus 1 year"
+  ExpiresByType video/mpeg "access plus 1 year"
+  
+  # CSS, JavaScript
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType text/javascript "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  
+  # ഫോണ്ടുകൾ
+  ExpiresByType application/font-woff "access plus 1 year"
+  ExpiresByType application/font-woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule> 

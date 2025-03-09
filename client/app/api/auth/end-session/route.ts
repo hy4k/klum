@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { admin } from "e:/Mithun/FETS/my-firebase-project/client/lib/firebase/admin";
+import { admin } from "@/lib/firebase/admin";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {

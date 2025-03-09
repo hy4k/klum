@@ -68,3 +68,63 @@ app.get('/api/user-data', async (req, res) => {
 
 // Express ആപ്പിനെ Firebase ഫങ്ഷനായി എക്സ്പോർട്ട് ചെയ്യുന്നു
 exports.api = onRequest({ cors: true }, app);
+
+// Client-side Firebase code
+document.addEventListener('DOMContentLoaded', function() {
+    const statusDiv = document.getElementById('status');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userDataDiv = document.getElementById('userData');
+
+    // Test Firebase connection
+    try {
+        if (firebase.app()) {
+            statusDiv.textContent = 'Firebase Connected Successfully!';
+            statusDiv.style.color = 'green';
+            
+            // Initialize Firestore
+            const db = firebase.firestore();
+            console.log('Firestore initialized');
+            
+            // Authentication state observer
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    statusDiv.textContent = `Logged in as: ${user.email}`;
+                    loginBtn.style.display = 'none';
+                    logoutBtn.style.display = 'block';
+                    userDataDiv.textContent = `Welcome, ${user.email}!`;
+                } else {
+                    statusDiv.textContent = 'Not logged in. Firebase connection OK.';
+                    loginBtn.style.display = 'block';
+                    logoutBtn.style.display = 'none';
+                    userDataDiv.textContent = '';
+                }
+            });
+
+            // Login button handler
+            loginBtn.addEventListener('click', async () => {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    await firebase.auth().signInWithPopup(provider);
+                } catch (error) {
+                    console.error('Login error:', error);
+                    statusDiv.textContent = `Login error: ${error.message}`;
+                }
+            });
+
+            // Logout button handler
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await firebase.auth().signOut();
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    statusDiv.textContent = `Logout error: ${error.message}`;
+                }
+            });
+        }
+    } catch (error) {
+        statusDiv.textContent = 'Firebase Connection Error: ' + error.message;
+        statusDiv.style.color = 'red';
+        console.error('Firebase error:', error);
+    }
+});

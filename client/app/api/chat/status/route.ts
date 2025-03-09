@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/firebase/admin"
 
+// സ്റ്റാറ്റിക് എക്സ്പോർട്ടിനായി ഈ റൂട്ട് ഫോഴ്സ് ഡൈനാമിക് ആയി സെറ്റ് ചെയ്യുന്നു
+export const dynamic = "force-static";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     // Check if KLUM is online

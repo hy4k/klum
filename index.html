@@ -1,0 +1,39 @@
+\index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klum Project</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFutMsbZrNABtZtcgkl1_zY9llalBvwbw",
+            authDomain: "klumsiland.firebaseapp.com",
+            projectId: "klumsiland",
+            storageBucket: "klumsiland.firebasestorage.app",
+            messagingSenderId: "381084089005",
+            appId: "1:381084089005:web:ce09934ac3550f74e4e424"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Welcome to Klum Project</h1>
+        <div id="status">Loading...</div>
+    </div>
+
+    <script src="client.js"></script>
+</body>
+</html>
