@@ -1,3 +1,6 @@
+// Triggering a new deployment with environment variables
+// Add any additional comments or code changes here
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
