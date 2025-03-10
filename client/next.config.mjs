@@ -7,25 +7,19 @@ const __dirname = path.dirname(__filename);
 const nextConfig = {
   output: 'export',
   eslint: {
+    // Remove this once we fix all ESLint errors
     ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
   },
   experimental: {
     webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
   },
-  // Add custom app directory path
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname, 'client');
-    config.resolve.modules.push(path.resolve('./client'));
-    config.resolve.modules.push(path.resolve('./client/app'));
+    config.resolve.alias['@'] = path.resolve(__dirname);
+    config.resolve.modules.push(path.resolve('./'));
     return config;
   },
 };

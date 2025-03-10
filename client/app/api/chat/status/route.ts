@@ -7,28 +7,28 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    // Check if KLUM is online
-    const klumStatusSnapshot = await db.collection("status").doc("klum").get()
-    const klumStatus = klumStatusSnapshot.exists ? klumStatusSnapshot.data() : { online: false }
+    // Get KLUM's presence status
+    const klumPresenceRef = db.collection("presence").doc("klum")
+    const klumSnapshot = await klumPresenceRef.get()
+    const klumStatus = klumSnapshot.data()
 
-    // Check if there's an active user
-    const activeUserSnapshot = await db
-      .collection("status")
+    // Check if any user is active
+    const userPresenceSnapshot = await db.collection("presence")
       .where("role", "==", "user")
       .where("online", "==", true)
       .limit(1)
       .get()
-
-    const hasActiveUser = !activeUserSnapshot.empty
+    
+    const hasActiveUser = !userPresenceSnapshot.empty
 
     return NextResponse.json({
-      klumOnline: klumStatus.online,
+      klumOnline: klumStatus?.online ?? false,
       hasActiveUser,
-      chatAvailable: klumStatus.online && !hasActiveUser,
+      chatAvailable: (klumStatus?.online ?? false) && !hasActiveUser,
     })
   } catch (error) {
     console.error("Error checking chat status:", error)
-    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to check chat status" }, { status: 500 })
   }
 }
 

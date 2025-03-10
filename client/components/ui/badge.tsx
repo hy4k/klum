@@ -1,6 +1,7 @@
+"use client"
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
@@ -15,10 +16,20 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        success: "border-transparent bg-green-600/30 text-green-200 border-green-500",
+        warning: "border-transparent bg-yellow-600/30 text-yellow-200 border-yellow-500",
+        info: "border-transparent bg-blue-600/30 text-blue-200 border-blue-500",
+        admin: "border-transparent bg-purple-600/30 text-purple-200 border-purple-500",
       },
+      size: {
+        default: "px-2.5 py-0.5 text-xs",
+        sm: "px-2 py-0.25 text-xs",
+        lg: "px-3 py-0.75 text-sm",
+      }
     },
     defaultVariants: {
       variant: "default",
+      size: "default"
     },
   }
 )

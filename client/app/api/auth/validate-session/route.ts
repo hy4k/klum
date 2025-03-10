@@ -1,17 +1,24 @@
-import { admin } from '@/lib/firebase/admin';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server'
+import { db } from '@/lib/firebase/admin'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const { sessionToken } = req.body;
-    try {
-      const decodedToken = await admin.auth().verifyIdToken(sessionToken);
-      res.status(200).send({ uid: decodedToken.uid });
-    } catch (error) {
-      res.status(500).send({ error: 'Invalid session token' });
+export async function POST(request: Request) {
+  try {
+    const { sessionToken } = await request.json()
+
+    if (!sessionToken) {
+      return NextResponse.json({ success: false, message: "Session token is required" }, { status: 400 })
     }
-  } else {
-    res.status(405).send({ error: 'Method not allowed' });
+
+    // Validate session
+    const sessionSnapshot = await db.collection("sessions").doc(sessionToken).get()
+    if (!sessionSnapshot.exists || !sessionSnapshot.data()?.active) {
+      return NextResponse.json({ success: false, message: "Invalid or inactive session" }, { status: 401 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error validating session:", error)
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
   }
 }
 
