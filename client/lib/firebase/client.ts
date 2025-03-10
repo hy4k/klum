@@ -45,14 +45,18 @@ if (isBrowser && !isBuildTime && hasFirebaseConfig) {
   }
 }
 
-// Create mock implementations or export the real ones
-export { 
-  app,
-  auth: auth as Auth,
-  firestore: firestore as Firestore,
-  storage: storage as FirebaseStorage,
-  database: database as Database
-};
+// Export the Firebase services
+export { app };
+export const authService = auth as Auth;
+export const firestoreService = firestore as Firestore;
+export const storageService = storage as FirebaseStorage;
+export const databaseService = database as Database;
+
+// For compatibility with existing code
+export { authService as auth };
+export { firestoreService as firestore };
+export { storageService as storage };
+export { databaseService as database };
 
 export default app;
 
