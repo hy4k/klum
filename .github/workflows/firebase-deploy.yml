@@ -25,10 +25,17 @@ jobs:
       - name: Build Client
         run: cd client && npm run build
       
+      - name: Format Project ID
+        id: format-project-id
+        run: |
+          PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}"
+          LOWERCASE_PROJECT_ID=$(echo "$PROJECT_ID" | tr '[:upper:]' '[:lower:]')
+          echo "LOWERCASE_PROJECT_ID=$LOWERCASE_PROJECT_ID" >> $GITHUB_ENV
+      
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
-          projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'
+          projectId: '${{ env.LOWERCASE_PROJECT_ID }}'
