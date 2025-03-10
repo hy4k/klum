@@ -1,4 +1,5 @@
 name: Firebase Deploy
+
 on:
   push:
     branches: [ "main" ]
@@ -11,48 +12,23 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v2
         with:
-          node-version: 20
+          node-version: '16'
       
-      - name: Create .env file
-        run: |
-          cd client
-          cat > .env << EOF
-          # Firebase Configuration (Client-Side)
-          NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=klumsiland.firebaseapp.com
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID=klumsiland
-          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=klumsiland.firebasestorage.app
-          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
-          NEXT_PUBLIC_FIREBASE_DATABASE_URL=https://klumsiland-default-rtdb.asia-southeast1.firebasedatabase.app
-
-          # Firebase Admin SDK (Server-Side)
-          FIREBASE_PROJECT_ID=klumsiland
-          FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}
-          FIREBASE_PRIVATE_KEY='${{ secrets.FIREBASE_PRIVATE_KEY }}'
-          FIREBASE_DATABASE_URL=https://klumsiland-default-rtdb.asia-southeast1.firebasedatabase.app
-
-          # OpenAI Configuration
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          NEXT_PUBLIC_AI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          EOF
+      - name: Install dependencies
+        run: npm ci
       
-      - name: Install Client Dependencies
-        run: cd client && npm ci
-      
-      - name: Build Client
-        run: cd client && npm run build
+      - name: Build
+        run: npm run build
       
       - name: Deploy to Firebase
-        uses: FirebaseExtended/action-hosting-deploy@v0
+        uses: w9jds/firebase-action@master
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: 'klumsiland'
+          args: deploy --only hosting
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
