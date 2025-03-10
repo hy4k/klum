@@ -22,6 +22,18 @@ export function useChatStatus() {
   })
 
   useEffect(() => {
+    // Skip Firebase operations if database is not initialized
+    if (!database) {
+      setStatus({
+        klumOnline: false,
+        hasActiveUser: false,
+        chatAvailable: false,
+        loading: false,
+        error: "Firebase not initialized",
+      });
+      return () => {}; // Return empty cleanup function
+    }
+
     // Reference to KLUM's status
     const klumStatusRef = ref(database, "status/klum")
 

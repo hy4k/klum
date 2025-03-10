@@ -12,16 +12,36 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useChatStatus } from "@/lib/hooks/useChatStatus"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
+// Default animation for floating elements that won't cause errors during static generation
+const defaultAnimations = Array.from({ length: 15 }).map((_, i) => ({
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  scale: Math.random() * 0.5 + 0.5,
+  width: `${Math.random() * 100 + 50}px`,
+  height: `${Math.random() * 100 + 50}px`,
+}));
+
 export default function EnterChat() {
   const [name, setName] = useState("")
   const [code, setCode] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isCheckingStatus, setIsCheckingStatus] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
   const router = useRouter()
   const chatStatus = useChatStatus()
 
+  // Mark component as mounted to avoid hydration issues with animations
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    // Skip session validation during static generation
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Check if user already has a valid session
     const sessionToken = localStorage.getItem("sessionToken")
     const userName = localStorage.getItem("userName")
@@ -123,35 +143,37 @@ export default function EnterChat() {
         <div className="absolute inset-0 bg-[url('/placeholder.svg?height=1080&width=1920')] bg-cover bg-center opacity-20"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-purple-900/70 via-indigo-800/70 to-blue-900/70"></div>
 
-        {/* Floating magical elements */}
-        <AnimatePresence>
-          {Array.from({ length: 15 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full bg-gradient-to-r from-purple-400 to-blue-400 opacity-20"
-              initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
-                scale: Math.random() * 0.5 + 0.5,
-              }}
-              animate={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
-                scale: Math.random() * 0.5 + 0.5,
-              }}
-              transition={{
-                duration: Math.random() * 20 + 10,
-                repeat: Number.POSITIVE_INFINITY,
-                repeatType: "reverse",
-              }}
-              style={{
-                width: `${Math.random() * 100 + 50}px`,
-                height: `${Math.random() * 100 + 50}px`,
-                filter: "blur(20px)",
-              }}
-            />
-          ))}
-        </AnimatePresence>
+        {/* Floating magical elements - only render on client */}
+        {isMounted && (
+          <AnimatePresence>
+            {defaultAnimations.map((animation, i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full bg-gradient-to-r from-purple-400 to-blue-400 opacity-20"
+                initial={{
+                  x: isMounted ? Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000) : animation.x,
+                  y: isMounted ? Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 600) : animation.y,
+                  scale: animation.scale,
+                }}
+                animate={{
+                  x: isMounted ? Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000) : animation.x,
+                  y: isMounted ? Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 600) : animation.y,
+                  scale: animation.scale,
+                }}
+                transition={{
+                  duration: Math.random() * 20 + 10,
+                  repeat: Number.POSITIVE_INFINITY,
+                  repeatType: "reverse",
+                }}
+                style={{
+                  width: animation.width,
+                  height: animation.height,
+                  filter: "blur(20px)",
+                }}
+              />
+            ))}
+          </AnimatePresence>
+        )}
       </div>
 
       <motion.div
@@ -182,7 +204,7 @@ export default function EnterChat() {
             </CardDescription>
           </CardHeader>
 
-          {!chatStatus.chatAvailable && name.toUpperCase() !== "KLUM" && (
+          {isMounted && !chatStatus.chatAvailable && name.toUpperCase() !== "KLUM" && (
             <CardContent>
               <Alert className="bg-red-900/50 border-red-700 text-red-100">
                 <AlertTitle>Chat Unavailable</AlertTitle>
