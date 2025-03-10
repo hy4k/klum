@@ -1,12 +1,23 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Check if we're running in a server environment or build time
+const isServer = typeof window === 'undefined';
+const isBuildTime = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
+// Initialize OpenAI client conditionally
+const openai = (!isBuildTime && isServer && process.env.OPENAI_API_KEY) 
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
 export async function POST(request: Request) {
   try {
+    // Check if OpenAI client is available
+    if (!openai) {
+      console.warn('OpenAI client not initialized. This would be an error in production.');
+      return NextResponse.json({ story: 'Story generation not available' });
+    }
+
     const { messages, era, year } = await request.json();
 
     // Extract conversation context
@@ -40,4 +51,4 @@ export async function POST(request: Request) {
     console.error('Story Generation API Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-} 
+}

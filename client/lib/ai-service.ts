@@ -1,8 +1,13 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_AI_API_KEY,
-});
+// Check if we're running in a browser/build environment
+const isBrowser = typeof window !== 'undefined';
+const isBuildTime = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
+// Initialize OpenAI client conditionally
+const openai = (!isBuildTime && process.env.NEXT_PUBLIC_AI_API_KEY) 
+  ? new OpenAI({ apiKey: process.env.NEXT_PUBLIC_AI_API_KEY })
+  : null;
 
 interface Message {
   role: string;
@@ -18,6 +23,12 @@ interface GenerateStoryParams {
 
 export async function generateAIStory({ era, characters, messages }: GenerateStoryParams): Promise<string> {
   try {
+    // Check if OpenAI client is available
+    if (!openai) {
+      console.warn('OpenAI client not initialized');
+      return "Story generation temporarily unavailable";
+    }
+
     const prompt = `
       Create a historical fiction story based on the following:
       Era: ${era}
@@ -48,6 +59,12 @@ interface GenerateImageParams {
 
 export async function generateAIImage({ era, characters, scene }: GenerateImageParams): Promise<string> {
   try {
+    // Check if OpenAI client is available
+    if (!openai) {
+      console.warn('OpenAI client not initialized');
+      return "";
+    }
+
     const prompt = `Create a historically accurate image set in ${era} featuring ${characters.join(" and ")} in the following scene: ${scene}.`;
 
     const response = await openai.images.generate({
@@ -79,6 +96,12 @@ export async function generateMessageSuggestion({
   character,
 }: GenerateSuggestionParams): Promise<string> {
   try {
+    // Check if OpenAI client is available
+    if (!openai) {
+      console.warn('OpenAI client not initialized');
+      return "";
+    }
+
     const recentMessages = messages
       .slice(-5)
       .map((m) => `${m.name || m.role}: ${m.content}`)
@@ -109,6 +132,12 @@ interface TranslateMessageParams {
 
 export async function translateMessage({ message, targetLanguage }: TranslateMessageParams): Promise<string> {
   try {
+    // Check if OpenAI client is available
+    if (!openai) {
+      console.warn('OpenAI client not initialized');
+      return message;
+    }
+
     const prompt = `Translate the following message to ${targetLanguage}:\n\n"${message}"`;
 
     const response = await openai.chat.completions.create({
