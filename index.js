@@ -17,6 +17,9 @@ const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
 const logger = require("firebase-functions/logger");
+const functions = require('firebase-functions');
+const next = require('next');
+const path = require('path');
 
 // Firebase അഡ്മിൻ ഇനിഷ്യലൈസ് ചെയ്യുന്നു
 try {
@@ -64,6 +67,23 @@ app.get('/api/user-data', async (req, res) => {
     logger.error('Error fetching user data:', error);
     return res.status(500).json({ error: 'Server error' });
   }
+});
+
+// Next.js app configuration
+const dev = process.env.NODE_ENV !== 'production';
+const nextApp = next({
+  dev,
+  conf: {
+    distDir: '.next',
+  },
+  dir: path.resolve(__dirname, 'client'),
+});
+const handle = nextApp.getRequestHandler();
+
+exports.nextServer = functions.https.onRequest(async (req, res) => {
+  console.log('File: ' + req.originalUrl);
+  await nextApp.prepare();
+  return handle(req, res);
 });
 
 // Express ആപ്പിനെ Firebase ഫങ്ഷനായി എക്സ്പോർട്ട് ചെയ്യുന്നു

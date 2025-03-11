@@ -13,18 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18.19.0'
+          cache: 'npm'
       
       - name: Install dependencies
         run: npm ci
       
+      - name: Install client dependencies
+        run: cd client && npm ci
+      
       - name: Build
         run: npm run build
+        env:
+          NODE_ENV: production
       
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
