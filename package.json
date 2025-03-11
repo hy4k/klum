@@ -4,7 +4,7 @@
   "description": "A Firebase web project",
   "scripts": {
     "lint": "es lint .",
-    "build": "tsc",
+    "build": "cd client && next build",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
