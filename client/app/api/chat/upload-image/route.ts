@@ -3,6 +3,14 @@ import { db, storage } from "@/lib/firebase/admin"
 import { v4 as uuidv4 } from "uuid"
 import sharp from "sharp"
 
+// Session interface
+interface Session {
+  active: boolean;
+  startedAt: Date;
+  userName: string;
+  // Add other session properties as needed
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
@@ -18,7 +26,8 @@ export async function POST(request: Request) {
 
     // Validate session
     const sessionSnapshot = await db.collection("sessions").doc(sessionToken).get()
-    if (!sessionSnapshot.exists || !sessionSnapshot.data()?.active) {
+    const sessionData = sessionSnapshot.data() as Session | undefined
+    if (!sessionSnapshot.exists || !sessionData?.active) {
       return NextResponse.json({ success: false, message: "Invalid or inactive session" }, { status: 401 })
     }
 
@@ -36,7 +45,8 @@ export async function POST(request: Request) {
     const fileName = `images/${sessionToken}/${uuidv4()}.jpg`
 
     // Upload to Firebase Storage
-    const file = storage.bucket().file(fileName)
+    const bucket = (storage as any).bucket();
+    const file = bucket.file(fileName)
     await file.save(processedImageBuffer, {
       metadata: {
         contentType: "image/jpeg",
@@ -47,7 +57,7 @@ export async function POST(request: Request) {
     await file.makePublic()
 
     // Get the public URL
-    const publicUrl = `https://storage.googleapis.com/${storage.bucket().name}/${fileName}`
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`
 
     return NextResponse.json({
       success: true,
