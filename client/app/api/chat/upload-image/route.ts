@@ -3,7 +3,7 @@ import { db, storage } from "@/lib/firebase/admin"
 import { v4 as uuidv4 } from "uuid"
 import sharp from "sharp"
 
-// Session interface
+// Session interface for proper type checking
 interface Session {
   active: boolean;
   startedAt: Date;
@@ -24,11 +24,11 @@ export async function POST(request: Request) {
       )
     }
 
-    // Validate session
-    const sessionSnapshot = await db.collection("sessions").doc(sessionToken).get()
-    const sessionData = sessionSnapshot.data() as Session | undefined
+    // Validate session - updated format
+    const sessionSnapshot = await db.collection("sessions").doc(sessionToken).get();
+    const sessionData = sessionSnapshot.data() as Session | undefined;
     if (!sessionSnapshot.exists || !sessionData?.active) {
-      return NextResponse.json({ success: false, message: "Invalid or inactive session" }, { status: 401 })
+      return NextResponse.json({ success: false, message: "Invalid or inactive session" }, { status: 401 });
     }
 
     // Convert file to buffer
