@@ -30,8 +30,15 @@ export async function POST(request: Request) {
       .limit(1)
       .get() as QuerySnapshot<SecretCode>
     
-    if (codesSnapshot.empty || !codesSnapshot.docs[0].data()?.active) {
+    if (codesSnapshot.empty) {
       return NextResponse.json({ success: false, message: "Invalid admin code" }, { status: 401 })
+    }
+    
+    const codeDoc = codesSnapshot.docs[0]
+    const codeData = codeDoc.data()
+    
+    if (!codeData?.active) {
+      return NextResponse.json({ success: false, message: "Admin code is inactive" }, { status: 401 })
     }
 
     // Generate admin session token

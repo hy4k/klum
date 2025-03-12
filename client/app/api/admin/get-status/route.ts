@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { db } from "@/lib/firebase-admin";
+import type { DocumentData } from 'firebase-admin/firestore';
+import * as FirebaseFirestore from 'firebase-admin/firestore';
+
+interface AdminSession extends DocumentData {
+  active: boolean;
+  createdAt: Date;
+  lastActivity: Date;
+  adminId: string;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,9 +24,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify admin session
-    const adminSessionDoc = await db.collection("adminSessions").doc(adminToken).get();
+    const adminSessionDoc = await db.collection("adminSessions").doc(adminToken).get() as FirebaseFirestore.DocumentSnapshot<AdminSession>;
     
-    if (!adminSessionDoc.exists || !adminSessionDoc.data()?.active) {
+    const adminSessionData = adminSessionDoc.data();
+    
+    if (!adminSessionDoc.exists || !adminSessionData?.active) {
       return NextResponse.json(
         { success: false, message: "Invalid admin session" },
         { status: 401 }
