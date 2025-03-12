@@ -10,7 +10,19 @@ interface Session {
   // Add other session properties as needed
 }
 
+// Check if we're in build/static generation time
+const isBuildTime = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
 export async function POST(request: Request) {
+  // During build time, return a mock response
+  if (isBuildTime) {
+    console.log('Build time detected - returning mock data for voice upload');
+    return NextResponse.json({
+      success: true,
+      url: 'https://example.com/mock-voice.mp3'
+    });
+  }
+
   try {
     const formData = await request.formData()
     const audioFile = formData.get("audio") as File

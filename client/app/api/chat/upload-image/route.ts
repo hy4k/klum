@@ -11,7 +11,19 @@ interface Session {
   // Add other session properties as needed
 }
 
+// Check if we're in build/static generation time
+const isBuildTime = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
 export async function POST(request: Request) {
+  // During build time, return a mock response
+  if (isBuildTime) {
+    console.log('Build time detected - returning mock data for image upload');
+    return NextResponse.json({
+      success: true,
+      url: 'https://example.com/mock-image.jpg'
+    });
+  }
+
   try {
     const formData = await request.formData()
     const imageFile = formData.get("image") as File

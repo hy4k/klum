@@ -15,7 +15,19 @@ interface AdminSession extends DocumentData {
   lastActivity: Date;
 }
 
+// Check if we're in build/static generation time
+const isBuildTime = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
 export async function POST(request: Request) {
+  // During build time, return a mock response
+  if (isBuildTime) {
+    console.log('Build time detected - returning mock data for admin auth');
+    return NextResponse.json({ 
+      success: true,
+      adminToken: 'mock-token-for-build-time'
+    });
+  }
+
   try {
     const { code } = await request.json()
 

@@ -17,7 +17,19 @@ interface Session extends DocumentData {
   lastActivity: Date;
 }
 
+// Check if we're in build/static generation time
+const isBuildTime = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
 export async function POST(request: Request) {
+  // During build time, return a mock response
+  if (isBuildTime) {
+    console.log('Build time detected - returning mock data for validate code');
+    return NextResponse.json({ 
+      success: true,
+      sessionToken: 'mock-session-token-for-build-time'
+    });
+  }
+
   try {
     const { code } = await request.json()
 
@@ -28,8 +40,9 @@ export async function POST(request: Request) {
     // Check if code exists and is valid in SecretCodes collection
     const codeRef = db.collection("SecretCodes").doc(code) as DocumentReference<SecretCode>
     const codeSnapshot = await codeRef.get() as DocumentSnapshot<SecretCode>
+    const codeData = codeSnapshot.data()
     
-    if (!codeSnapshot.exists || !codeSnapshot.data()?.active) {
+    if (!codeSnapshot.exists || !codeData?.active) {
       return NextResponse.json({ success: false, message: "Invalid or inactive code" }, { status: 401 })
     }
 

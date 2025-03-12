@@ -11,7 +11,19 @@ interface AdminSession extends DocumentData {
   adminId: string;
 }
 
+// Check if we're in build/static generation time
+const isBuildTime = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
 export async function GET(request: NextRequest) {
+  // During build time, return a mock response
+  if (isBuildTime) {
+    console.log('Build time detected - returning mock data for admin sessions');
+    return NextResponse.json({
+      success: true,
+      sessions: []
+    });
+  }
+
   try {
     // Verify admin token from headers
     const adminToken = request.headers.get("x-admin-token");
