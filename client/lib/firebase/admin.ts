@@ -1,5 +1,5 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth, Auth } from 'firebase-admin/auth';
+import { getAuth, Auth, DecodedIdToken } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import * as adminSdk from 'firebase-admin';
@@ -7,6 +7,11 @@ import * as adminSdk from 'firebase-admin';
 // Check if we're running in a server environment
 const isServer = typeof window === 'undefined';
 const isBuildTime = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
+// Define auth interface with the methods we use
+interface AuthInterface {
+  verifyIdToken(token: string): Promise<DecodedIdToken>;
+}
 
 // Mock implementations for build time
 const mockDb = {
@@ -26,8 +31,8 @@ const mockDb = {
 };
 
 // Mock auth implementation with proper types
-const mockAuth: Partial<Auth> = {
-  verifyIdToken: () => Promise.resolve({ uid: 'mock-uid' } as any),
+const mockAuth: AuthInterface = {
+  verifyIdToken: (token: string) => Promise.resolve({ uid: 'mock-uid' } as DecodedIdToken),
 };
 
 // Initialize Firebase Admin
@@ -79,5 +84,5 @@ export const adminStorage = app ? getStorage(app) : { /* mock storage implementa
 export const admin = adminSdk;
 export const db = app ? adminDb : mockDb;
 export const storage = app ? adminStorage : { bucket: () => ({ file: () => ({}) }) };
-export const auth = app ? adminAuth : mockAuth;
+export const auth: AuthInterface = app ? (getAuth(app) as unknown as AuthInterface) : mockAuth;
 

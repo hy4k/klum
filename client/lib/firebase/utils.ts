@@ -3,6 +3,7 @@ import { FirebaseAdminError } from './error';
 
 export async function verifyUser(token: string) {
   try {
+    // Explicit type assertion to help TypeScript understand the structure
     return await auth.verifyIdToken(token);
   } catch (error) {
     throw new FirebaseAdminError('Invalid user token');
