@@ -74,5 +74,8 @@ export const adminStorage = app ? getStorage(app) : { /* mock storage implementa
 export const admin = adminSdk;
 export const db = app ? adminDb : mockDb;
 export const storage = app ? adminStorage : { bucket: () => ({ file: () => ({}) }) };
-export const auth = app ? adminAuth : { /* mock auth implementation */ };
+export const auth = app ? adminAuth : { 
+  verifyIdToken: () => Promise.resolve({ uid: 'mock-uid' }),
+  /* other mock auth methods as needed */
+};
 
