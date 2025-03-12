@@ -24,8 +24,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify Firebase token
-    const decodedToken = await auth.verifyIdToken(token);
+    // Verify Firebase token using type assertion to ensure TypeScript accepts it
+    const decodedToken = await (auth as any).verifyIdToken(token);
     const { content, era, year, context } = await request.json();
 
     // Generate AI response based on historical context
