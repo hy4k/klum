@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { auth, db } from "@/lib/firebase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { DocumentData, QueryDocumentSnapshot } from '@firebase/firestore-types';
+import { collection, getDocs, getDoc, doc, query, orderBy, limit, where, setDoc, addDoc, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 
 interface SiteStatus {
   secretCodesCount: number;
@@ -87,35 +87,39 @@ export default function AdminPage() {
   const fetchAdminData = async (token: string) => {
     try {
       // Fetch collection counts
-      const [secretCodes, messages, sessions] = await Promise.all([
-        db.collection("SecretCodes").get(),
-        db.collection("messages").get(),
-        db.collection("sessions").get()
+      const [secretCodesSnapshot, messagesSnapshot, sessionsSnapshot] = await Promise.all([
+        getDocs(collection(db, "SecretCodes")),
+        getDocs(collection(db, "messages")),
+        getDocs(collection(db, "sessions"))
       ]);
 
       setStatus({
-        secretCodesCount: secretCodes.size,
-        messagesCount: messages.size,
-        sessionsCount: sessions.size
+        secretCodesCount: secretCodesSnapshot.docs.length,
+        messagesCount: messagesSnapshot.docs.length,
+        sessionsCount: sessionsSnapshot.docs.length
       });
 
       // Fetch recent messages
-      const recentMsgs = await db.collection("messages")
-        .orderBy("timestamp", "desc")
-        .limit(5)
-        .get();
+      const recentMsgsQuery = query(
+        collection(db, "messages"),
+        orderBy("timestamp", "desc"),
+        limit(5)
+      );
+      const recentMsgsSnapshot = await getDocs(recentMsgsQuery);
       
-      setRecentMessages(recentMsgs.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+      setRecentMessages(recentMsgsSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
         id: doc.id,
         ...doc.data()
       })));
 
       // Fetch active sessions
-      const activeSess = await db.collection("sessions")
-        .where("active", "==", true)
-        .get();
+      const activeSessionsQuery = query(
+        collection(db, "sessions"),
+        where("active", "==", true)
+      );
+      const activeSessSnapshot = await getDocs(activeSessionsQuery);
       
-      setActiveSessions(activeSess.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+      setActiveSessions(activeSessSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
         id: doc.id,
         ...doc.data()
       })));
@@ -171,7 +175,7 @@ export default function AdminPage() {
       // Simulate different system tests
       switch (testName) {
         case 'Database Connection':
-          await db.collection("status").doc("test").set({
+          await setDoc(doc(db, "status", "test"), {
             timestamp: new Date()
           });
           break;
@@ -183,7 +187,7 @@ export default function AdminPage() {
           }
           break;
         case 'Chat System':
-          await db.collection("messages").add({
+          await addDoc(collection(db, "messages"), {
             content: "Test message",
             timestamp: new Date(),
             type: "test"
