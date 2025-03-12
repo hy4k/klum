@@ -10,7 +10,8 @@ const openai = (!isBuildTime && process.env.NEXT_PUBLIC_AI_API_KEY)
   ? new OpenAI({ apiKey: process.env.NEXT_PUBLIC_AI_API_KEY })
   : null;
 
-interface Message {
+// Common interface for OpenAI messages
+interface ChatMessage {
   role: string;
   content: string;
   name?: string;
@@ -19,7 +20,7 @@ interface Message {
 interface GenerateStoryParams {
   era: string;
   characters: string[];
-  messages: HookMessage[];
+  messages: HookMessage[] | ChatMessage[];
 }
 
 export async function generateAIStory({ era, characters, messages }: GenerateStoryParams): Promise<string> {
@@ -30,12 +31,14 @@ export async function generateAIStory({ era, characters, messages }: GenerateSto
       return "Story generation temporarily unavailable";
     }
 
-    // Convert HookMessage to the format needed for OpenAI
-    const convertedMessages = messages.map(m => ({
-      role: m.sender === 'ai' ? 'assistant' : 'user',
-      content: m.content,
-      name: m.sender
-    }));
+    // Determine message format and convert if needed
+    const convertedMessages: ChatMessage[] = messages.length > 0 && 'sender' in messages[0] 
+      ? (messages as HookMessage[]).map(m => ({
+          role: m.sender === 'ai' ? 'assistant' : 'user',
+          content: m.content,
+          name: m.sender
+        }))
+      : messages as ChatMessage[];
 
     const prompt = `
       Create a historical fiction story based on the following:
@@ -110,8 +113,8 @@ export async function generateMessageSuggestion({
       return "";
     }
 
-    // Convert HookMessage to the format needed for OpenAI
-    const convertedMessages = messages.slice(-5).map(m => ({
+    // Convert HookMessage to ChatMessage format for OpenAI
+    const convertedMessages: ChatMessage[] = messages.slice(-5).map(m => ({
       role: m.sender === 'ai' ? 'assistant' : 'user',
       content: m.content,
       name: m.sender
