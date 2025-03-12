@@ -1,5 +1,5 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
+import { getAuth, Auth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import * as adminSdk from 'firebase-admin';
@@ -23,6 +23,11 @@ const mockDb = {
       }),
     }),
   }),
+};
+
+// Mock auth implementation with proper types
+const mockAuth: Partial<Auth> = {
+  verifyIdToken: () => Promise.resolve({ uid: 'mock-uid' } as any),
 };
 
 // Initialize Firebase Admin
@@ -74,8 +79,5 @@ export const adminStorage = app ? getStorage(app) : { /* mock storage implementa
 export const admin = adminSdk;
 export const db = app ? adminDb : mockDb;
 export const storage = app ? adminStorage : { bucket: () => ({ file: () => ({}) }) };
-export const auth = app ? adminAuth : { 
-  verifyIdToken: () => Promise.resolve({ uid: 'mock-uid' }),
-  /* other mock auth methods as needed */
-};
+export const auth = app ? adminAuth : mockAuth;
 

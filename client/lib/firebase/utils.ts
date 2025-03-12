@@ -1,8 +1,9 @@
-import { adminAuth, adminDb } from './admin';
+import { auth, adminDb } from './admin';
+import { FirebaseAdminError } from './error';
 
 export async function verifyUser(token: string) {
   try {
-    return await adminAuth.verifyIdToken(token);
+    return await auth.verifyIdToken(token);
   } catch (error) {
     throw new FirebaseAdminError('Invalid user token');
   }
