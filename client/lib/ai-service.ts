@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import type { Message as HookMessage } from "@/lib/hooks/useMessages";
 
 // Check if we're running in a browser/build environment
 const isBrowser = typeof window !== 'undefined';
@@ -18,7 +19,7 @@ interface Message {
 interface GenerateStoryParams {
   era: string;
   characters: string[];
-  messages: Message[];
+  messages: HookMessage[];
 }
 
 export async function generateAIStory({ era, characters, messages }: GenerateStoryParams): Promise<string> {
@@ -29,12 +30,19 @@ export async function generateAIStory({ era, characters, messages }: GenerateSto
       return "Story generation temporarily unavailable";
     }
 
+    // Convert HookMessage to the format needed for OpenAI
+    const convertedMessages = messages.map(m => ({
+      role: m.sender === 'ai' ? 'assistant' : 'user',
+      content: m.content,
+      name: m.sender
+    }));
+
     const prompt = `
       Create a historical fiction story based on the following:
       Era: ${era}
       Characters: ${characters.join(", ")}
       Recent conversation:
-      ${messages.map((m) => `${m.name || m.role}: ${m.content}`).join("\n")}
+      ${convertedMessages.map((m) => `${m.name || m.role}: ${m.content}`).join("\n")}
       Write a compelling, detailed story (300-500 words) that reimagines this conversation as a historical event.
     `;
 
@@ -81,7 +89,7 @@ export async function generateAIImage({ era, characters, scene }: GenerateImageP
 }
 
 interface GenerateSuggestionParams {
-  messages: Message[];
+  messages: HookMessage[];
   userName: string;
   isRolePlay: boolean;
   era?: string;
@@ -102,8 +110,14 @@ export async function generateMessageSuggestion({
       return "";
     }
 
-    const recentMessages = messages
-      .slice(-5)
+    // Convert HookMessage to the format needed for OpenAI
+    const convertedMessages = messages.slice(-5).map(m => ({
+      role: m.sender === 'ai' ? 'assistant' : 'user',
+      content: m.content,
+      name: m.sender
+    }));
+
+    const recentMessages = convertedMessages
       .map((m) => `${m.name || m.role}: ${m.content}`)
       .join("\n");
 
