@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/firebase/admin"
 
+// Interface for KLUM status
+interface KlumStatus {
+  online: boolean;
+  lastActive?: Date;
+  // Add other properties if needed
+}
+
 // സ്റ്റാറ്റിക് എക്സ്പോർട്ടിനായി ഈ റൂട്ട് ഫോഴ്സ് ഡൈനാമിക് ആയി സെറ്റ് ചെയ്യുന്നു
 export const dynamic = "force-static";
 export const revalidate = 0;
@@ -10,7 +17,7 @@ export async function GET() {
     // Get KLUM's presence status
     const klumPresenceRef = db.collection("presence").doc("klum")
     const klumSnapshot = await klumPresenceRef.get()
-    const klumStatus = klumSnapshot.data()
+    const klumStatus = klumSnapshot.data() as KlumStatus | undefined
 
     // Check if any user is active
     const userPresenceSnapshot = await db.collection("presence")
