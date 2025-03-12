@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/firebase/admin'
-import { getDoc, doc, DocumentSnapshot } from 'firebase-admin/firestore'
+import { DocumentSnapshot } from 'firebase-admin/firestore'
 
 interface Session {
   active: boolean;
@@ -18,8 +18,7 @@ export async function POST(request: Request) {
     }
 
     // Validate session
-    const sessionRef = doc(db, "sessions", sessionToken);
-    const sessionSnapshot = await getDoc(sessionRef) as DocumentSnapshot<Session>;
+    const sessionSnapshot = await db.collection("sessions").doc(sessionToken).get() as DocumentSnapshot<Session>;
     
     const sessionData = sessionSnapshot.data();
     if (!sessionSnapshot.exists || !sessionData?.active) {
