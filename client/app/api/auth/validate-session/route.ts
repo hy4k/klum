@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/firebase/admin'
+import { getDoc, doc, DocumentSnapshot } from 'firebase-admin/firestore'
+
+interface Session {
+  active: boolean;
+  startedAt: Date;
+  userName: string;
+  // Add other session properties as needed
+}
 
 export async function POST(request: Request) {
   try {
@@ -10,8 +18,11 @@ export async function POST(request: Request) {
     }
 
     // Validate session
-    const sessionSnapshot = await db.collection("sessions").doc(sessionToken).get()
-    if (!sessionSnapshot.exists || !sessionSnapshot.data()?.active) {
+    const sessionRef = doc(db, "sessions", sessionToken);
+    const sessionSnapshot = await getDoc(sessionRef) as DocumentSnapshot<Session>;
+    
+    const sessionData = sessionSnapshot.data();
+    if (!sessionSnapshot.exists || !sessionData?.active) {
       return NextResponse.json({ success: false, message: "Invalid or inactive session" }, { status: 401 })
     }
 
