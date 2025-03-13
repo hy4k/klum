@@ -3,6 +3,7 @@ import { getAuth, Auth, DecodedIdToken } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import * as adminSdk from 'firebase-admin';
+import { getDatabase } from 'firebase-admin/database';
 
 // Check if we're running in a server environment
 const isServer = typeof window === 'undefined';
@@ -160,4 +161,7 @@ export const auth: AuthInterface = app ? (getAuth(app) as unknown as AuthInterfa
 export const adminAuth = app ? getAuth(app) : mockAuth;
 export const adminDb = app ? getFirestore(app) : mockDb;
 export const adminStorage = app ? getStorage(app) : mockStorage;
+
+// Export Realtime Database instance
+export const database = isServer && !isBuildTime ? getDatabase() : null;
 

@@ -16,10 +16,9 @@ export default function Home() {
         <h1 className="text-5xl md:text-7xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">
           KLUMSI-LAND
         </h1>
-        <p className="text-xl md:text-2xl mb-8 text-blue-100">A breathtaking virtual country on another planet</p>
+        <p className="text-xl md:text-2xl mb-8 text-blue-100">A private, invite-only chat experience</p>
         <p className="mb-12 text-lg text-blue-200 max-w-2xl mx-auto">
-          A realm where Asgard's divine splendor meets the enchanting Baghdad of Arabian Nights, offering mystery,
-          magic, and wonder.
+          Connect with KLUM in an exclusive one-on-one chat. Experience magical conversations and time-travel adventures together.
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center gap-6">
@@ -28,11 +27,17 @@ export default function Home() {
               Enter KLUMSI-CHAT
             </Button>
           </Link>
+          <Link href="/admin" passHref>
+            <Button variant="outline" className="text-lg px-8 py-6 border-2 border-purple-400 text-purple-200 hover:bg-purple-900/30 shadow-lg">
+              Admin Access
+            </Button>
+          </Link>
         </div>
       </div>
 
       <div className="relative z-10 mt-16 text-center text-blue-200">
         <p>Only those with a secret code from KLUM may enter the magical realm.</p>
+        <p className="mt-2 text-sm text-blue-300/70">Experience the "Slip into Secrets" time travel feature once inside!</p>
       </div>
     </div>
   )

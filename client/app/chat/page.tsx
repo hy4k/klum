@@ -18,6 +18,7 @@ import TranslationDropdown from "@/components/translation-dropdown"
 import { useMessages, type Message } from "@/lib/hooks/useMessages"
 import { usePresence } from "@/lib/hooks/usePresence"
 import { generateAIStory } from "@/lib/ai-service"
+import TimeTravelChat from "@/components/time-travel-chat"
 
 interface RolePlaySettings {
   isActive: boolean
@@ -48,6 +49,7 @@ export default function Chat() {
   const [showImagePreview, setShowImagePreview] = useState(false)
   const [showAIImageModal, setShowAIImageModal] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [showTimeTravelChat, setShowTimeTravelChat] = useState(false)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
@@ -280,6 +282,7 @@ export default function Chat() {
   const handleSecretsConfirm = async (settings: RolePlaySettings) => {
     setRolePlaySettings(settings)
     setShowSecretsModal(false)
+    setShowTimeTravelChat(true)
 
     // Add a system message about entering role-play mode
     await sendTextMessage(
@@ -405,206 +408,134 @@ export default function Chat() {
       </div>
 
       {/* Header */}
-      <motion.header
-        className={`relative z-10 flex items-center justify-between p-4 border-b ${rolePlaySettings.isActive ? "border-amber-600 bg-amber-950/30" : "border-purple-600 bg-black/30"} backdrop-blur-sm`}
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-purple-950 to-indigo-950 border-b border-purple-700 p-3 flex items-center justify-between">
         <div className="flex items-center">
-          {isAdmin && (
-            <motion.div
-              animate={{
-                rotate: [0, 10, -10, 0],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Number.POSITIVE_INFINITY,
-                repeatType: "reverse",
-              }}
-            >
-              <Crown className="h-6 w-6 text-amber-400 mr-2 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-            </motion.div>
-          )}
-          <h1 className={`text-xl font-bold ${isAdmin ? "text-amber-300" : "text-blue-300"}`}>
-            {rolePlaySettings.isActive
-              ? isAdmin
-                ? rolePlaySettings.klumCharacter
-                : rolePlaySettings.userCharacter
-              : isAdmin
-                ? "KLUM"
-                : userName}
-          </h1>
-          {rolePlaySettings.isActive && (
-            <span className="ml-2 text-sm text-amber-200/70">({rolePlaySettings.era})</span>
-          )}
+          <Crown className="h-6 w-6 text-amber-400 mr-2" />
+          <h1 className="text-xl font-bold text-amber-300">KLUMSI-CHAT</h1>
         </div>
         <div className="flex items-center gap-2">
-          {rolePlaySettings.isActive ? (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleMakeItHappen}
-                disabled={isGeneratingStory}
-                className="bg-amber-800/50 hover:bg-amber-700/50 border-amber-500 text-amber-200 relative overflow-hidden group"
-              >
-                {isGeneratingStory ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="h-4 w-4 mr-1" />
-                    Make It Happen
-                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-amber-400/0 via-amber-400/30 to-amber-400/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAIImageGenerate}
-                className="bg-indigo-800/50 hover:bg-indigo-700/50 border-indigo-500 text-indigo-200"
-              >
-                <ImageIcon className="h-4 w-4 mr-1" /> Create Image
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exitRolePlay}
-                className="bg-red-800/50 hover:bg-red-700/50 border-red-500 text-red-200"
-              >
-                <Clock className="h-4 w-4 mr-1" /> Exit Time Travel
-              </Button>
-            </>
-          ) : (
+          {isAdmin && (
             <Button
               variant="outline"
               size="sm"
-              onClick={handleSecretsToggle}
-              className="bg-purple-800/50 hover:bg-purple-700/50 border-purple-500 text-purple-200 relative overflow-hidden group"
+              className="border-amber-500 text-amber-300 hover:bg-amber-500/10"
+              onClick={() => setShowSecretsModal(true)}
             >
               <Clock className="h-4 w-4 mr-1" />
               Slip into Secrets
-              <motion.div
-                className="absolute right-2 top-1"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Number.POSITIVE_INFINITY,
-                  repeatType: "reverse",
-                }}
-              >
-                <Sparkles className="h-3 w-3 text-purple-300" />
-              </motion.div>
             </Button>
           )}
-          <Button variant="destructive" size="sm" onClick={endChat} className="bg-red-800 hover:bg-red-700">
-            <X className="h-4 w-4 mr-1" /> End Chat
-          </Button>
+          <TranslationDropdown />
         </div>
-      </motion.header>
+      </header>
 
-      {/* Chat Messages */}
-      <div
-        className={`relative z-10 flex-1 overflow-y-auto p-4 space-y-4 ${rolePlaySettings.isActive ? "bg-amber-950/10" : ""}`}
-      >
-        <AnimatePresence initial={false}>
-          {messages.map((message) => (
-            <motion.div
-              key={message.id}
-              className={`flex ${message.sender === "System" ? "justify-center" : message.sender === "KLUM" ? "justify-start" : "justify-end"}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {message.sender === "System" ? (
-                <div className="bg-purple-900/70 border border-purple-500/50 text-purple-200 px-4 py-2 rounded-lg text-sm max-w-[80%]">
-                  {message.content}
-                </div>
-              ) : (
-                <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    message.sender === "KLUM"
-                      ? message.isRolePlay
-                        ? "bg-gradient-to-r from-amber-800/80 to-amber-950/80 border border-amber-600/50 text-amber-100"
-                        : "bg-gradient-to-r from-amber-700/80 to-amber-900/80 border border-amber-500/50 text-amber-100"
-                      : message.isRolePlay
-                        ? "bg-gradient-to-r from-blue-800/80 to-blue-950/80 border border-blue-600/50 text-blue-100"
-                        : "bg-gradient-to-r from-blue-700/80 to-blue-900/80 border border-blue-500/50 text-blue-100"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center">
-                      {message.sender === "KLUM" && <Crown className="h-4 w-4 text-amber-400 mr-1" />}
-                      <span
-                        className={`text-xs font-bold ${message.sender === "KLUM" ? "text-amber-300" : "text-blue-300"}`}
-                      >
-                        {message.isRolePlay ? message.character : message.sender}
-                      </span>
-                    </div>
-                    {!message.isVoice && !message.isImage && (
-                      <TranslationDropdown
-                        message={message.content}
-                        onTranslate={(translatedText) => handleTranslate(message, translatedText)}
-                      />
-                    )}
-                  </div>
-
-                  {message.isVoice ? (
-                    <div className="flex items-center">
-                      <audio src={message.content} controls className="max-w-full" />
-                    </div>
-                  ) : message.isImage ? (
-                    <div className="cursor-pointer" onClick={() => handleImageClick(message.content)}>
-                      <img
-                        src={message.content || "/placeholder.svg"}
-                        alt="Shared image"
-                        className="max-w-full rounded-md border border-gray-700/50 hover:opacity-90 transition-opacity"
-                      />
-                    </div>
-                  ) : (
-                    <p>{message.content}</p>
-                  )}
-
-                  <div className="text-right mt-1">
-                    <span className="text-xs opacity-70">
-                      {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Message Suggestions */}
-      {messages.length > 0 && (
-        <div className={`relative z-10 px-4 ${rolePlaySettings.isActive ? "bg-amber-950/20" : "bg-blue-950/20"}`}>
-          <MessageSuggestions
-            messages={messages}
-            userName={userName}
-            isRolePlay={rolePlaySettings.isActive}
-            era={rolePlaySettings.era}
-            character={
-              rolePlaySettings.isActive
-                ? isAdmin
-                  ? rolePlaySettings.klumCharacter
-                  : rolePlaySettings.userCharacter
-                : undefined
-            }
-            onSelectSuggestion={handleSuggestionSelect}
+      {/* Main content */}
+      <main className="flex-1 container mx-auto max-w-5xl px-4 py-6">
+        {showTimeTravelChat ? (
+          <TimeTravelChat 
+            userName={userName} 
+            sessionToken={sessionToken} 
+            isAdmin={isAdmin} 
           />
-        </div>
-      )}
+        ) : (
+          <>
+            {/* Chat Messages */}
+            <div
+              className={`relative z-10 flex-1 overflow-y-auto p-4 space-y-4 ${rolePlaySettings.isActive ? "bg-amber-950/10" : ""}`}
+            >
+              <AnimatePresence initial={false}>
+                {messages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    className={`flex ${message.sender === "System" ? "justify-center" : message.sender === "KLUM" ? "justify-start" : "justify-end"}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {message.sender === "System" ? (
+                      <div className="bg-purple-900/70 border border-purple-500/50 text-purple-200 px-4 py-2 rounded-lg text-sm max-w-[80%]">
+                        {message.content}
+                      </div>
+                    ) : (
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 ${
+                          message.sender === "KLUM"
+                            ? message.isRolePlay
+                              ? "bg-gradient-to-r from-amber-800/80 to-amber-950/80 border border-amber-600/50 text-amber-100"
+                              : "bg-gradient-to-r from-amber-700/80 to-amber-900/80 border border-amber-500/50 text-amber-100"
+                            : message.isRolePlay
+                              ? "bg-gradient-to-r from-blue-800/80 to-blue-950/80 border border-blue-600/50 text-blue-100"
+                              : "bg-gradient-to-r from-blue-700/80 to-blue-900/80 border border-blue-500/50 text-blue-100"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center">
+                            {message.sender === "KLUM" && <Crown className="h-4 w-4 text-amber-400 mr-1" />}
+                            <span
+                              className={`text-xs font-bold ${message.sender === "KLUM" ? "text-amber-300" : "text-blue-300"}`}
+                            >
+                              {message.isRolePlay ? message.character : message.sender}
+                            </span>
+                          </div>
+                          {!message.isVoice && !message.isImage && (
+                            <TranslationDropdown
+                              message={message.content}
+                              onTranslate={(translatedText) => handleTranslate(message, translatedText)}
+                            />
+                          )}
+                        </div>
+
+                        {message.isVoice ? (
+                          <div className="flex items-center">
+                            <audio src={message.content} controls className="max-w-full" />
+                          </div>
+                        ) : message.isImage ? (
+                          <div className="cursor-pointer" onClick={() => handleImageClick(message.content)}>
+                            <img
+                              src={message.content || "/placeholder.svg"}
+                              alt="Shared image"
+                              className="max-w-full rounded-md border border-gray-700/50 hover:opacity-90 transition-opacity"
+                            />
+                          </div>
+                        ) : (
+                          <p>{message.content}</p>
+                        )}
+
+                        <div className="text-right mt-1">
+                          <span className="text-xs opacity-70">
+                            {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Message Suggestions */}
+            {messages.length > 0 && (
+              <div className={`relative z-10 px-4 ${rolePlaySettings.isActive ? "bg-amber-950/20" : "bg-blue-950/20"}`}>
+                <MessageSuggestions
+                  messages={messages}
+                  userName={userName}
+                  isRolePlay={rolePlaySettings.isActive}
+                  era={rolePlaySettings.era}
+                  character={
+                    rolePlaySettings.isActive
+                      ? isAdmin
+                        ? rolePlaySettings.klumCharacter
+                        : rolePlaySettings.userCharacter
+                      : undefined
+                  }
+                  onSelectSuggestion={handleSuggestionSelect}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </main>
 
       {/* Message Input */}
       <motion.div
