@@ -30,6 +30,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@types/react-day-picker": "^5.2.1",
     "eslint": "^8.15.0",
     "eslint-config-google": "^0.14.0",
     "firebase-functions-test": "^3.1.0",

@@ -13,8 +13,8 @@ module.exports = {
   rules: {
     "no-restricted-globals": ["error", "name", "length"],
     "prefer-arrow-callback": "error",
-    "quotes": ["error", "double", { "allowTemplateLiterals": true }],
-    "linebreak-style": "off"  // Disabling linebreak-style rule
+    "quotes": ["error", "double", {"allowTemplateLiterals": true}],
+    "linebreak-style": "off", // Disabling linebreak-style rule
   },
   overrides: [
     {

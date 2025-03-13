@@ -425,7 +425,7 @@ export default function Chat() {
               Slip into Secrets
             </Button>
           )}
-          <TranslationDropdown />
+          <TranslationDropdown {...({} as any)} />
         </div>
       </header>
 

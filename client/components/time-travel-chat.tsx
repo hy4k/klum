@@ -19,6 +19,7 @@ interface Message {
   character?: string;
   timestamp: any;
   sessionToken: string;
+  isTimeTravelMode?: boolean;
 }
 
 interface TimeTravelChatProps {

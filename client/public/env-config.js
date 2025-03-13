@@ -8,4 +8,4 @@ window.ENV = {
   FIREBASE_STORAGE_BUCKET: "your-firebase-project-id.appspot.com",
   FIREBASE_MESSAGING_SENDER_ID: "your-messaging-sender-id",
   FIREBASE_APP_ID: "your-app-id",
-}; 
+};
